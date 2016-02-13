@@ -1,5 +1,8 @@
 #include "arithmetic_decoder.h"
 
+#include "intervals.h"
+#include "util.h"
+
 #include <stdio.h>
 
 using namespace std;
@@ -39,31 +42,20 @@ void ArithmeticDecoder::DebugPrint() const {
 
 // Output any common leading bits, and expand the ranges.
 void ArithmeticDecoder::Renormalize() {
-  const bound HALF = Intervals::ONE / 2;
-  bit lower_msb, upper_msb;
- 
-  lower_msb = lower_ / HALF;
-  upper_msb = upper_ / HALF;
-  while (lower_msb == upper_msb) {
-    // The MSB matches. Expand the ranges.
-    expand();
- 
-    // Recompute the MSBs.
-    lower_msb = lower_ / HALF;
-    upper_msb = upper_ / HALF;
+  // Find the least significant bit above (and including) which the lower and
+  // upper bounds match.
+  bound same_above = next_pow2(lower_ ^ upper_);
+  if (same_above < Intervals::ONE) {
+    bound mul = Intervals::ONE / same_above;
+    const bound mask = Intervals::ONE - 1;
+
+    lsb_ *= mul;
+    if (lsb_ > Intervals::ONE)
+      throw logic_error("Next bit position overflows.");
+    value_ = (value_ * mul) & mask;
+    lower_ = (lower_ * mul) & mask;
+    upper_ = (upper_ * mul) & mask;
   }
-}
-
-// Discard the leading bit, shift up by one, and expand the ranges.
-void ArithmeticDecoder::expand() {
-  lsb_ *= 2;
-  if (lsb_ > Intervals::ONE)
-    throw logic_error("Next bit position overflows.");
-
-  const int mask = Intervals::ONE - 1;
-  value_ = (value_ << 1) & mask;
-  lower_ = (lower_ << 1) & mask;
-  upper_ = (upper_ << 1) & mask;
 }
 
 // Fetch as many bits as possible and put them in value_.

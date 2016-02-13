@@ -1,5 +1,7 @@
 #include "intervals.h"
 
+#include "util.h"
+
 #include <iostream>
 #include <stdexcept>
 #include <stdio.h>
@@ -8,19 +10,9 @@ using namespace std;
 
 const bound Intervals::ONE = 0x0000000080000000ULL;
 
-static int next_pow2(int x) {
-  x--;
-  x |= x >> 1;
-  x |= x >> 2;
-  x |= x >> 4;
-  x |= x >> 8;
-  x |= x >> 16;
-  return x + 1;
-}
-
 bound Intervals::within(bound min, bound max, bound value) {
   bound size = max - min;
-  return min + size * value / Intervals::ONE;
+  return min + size * value / ONE;
 }
 
 // Construct a new instance with intervals for codes [0..num_codes).

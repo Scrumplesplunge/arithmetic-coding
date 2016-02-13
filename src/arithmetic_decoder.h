@@ -19,9 +19,6 @@ class ArithmeticDecoder {
   // Discard all common leading bits by repeatedly expanding the ranges.
   void Renormalize();
 
-  // Discard the leading bit, shift up by one, and expand the ranges.
-  void expand();
-
   // Fetch as many bits as possible and put them in value_.
   void read_bits();
 
