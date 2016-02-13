@@ -49,33 +49,36 @@ bound Intervals::upper(int code) const {
 // containing the interval [value_min, value_max], if there is one.
 bool Intervals::CodeAt(bound range_min, bound range_max, bound value_min,
                        bound value_max, int* code) const {
-  // Binary search (by the lower bound) for an interval which contains the one
-  // given.
-  int i = 0, j = num_codes_;
-  while (i + 1 < j) {
-    int mid = (i + j) / 2;
-    if (within(range_min, range_max, lower(mid)) <= value_min) {
-      // The lower bound of mid comes before the lower bound of the given
-      // interval, so it (as well as possibly larger indices) is a valid
-      // candidate.
-      i = mid;
+  // Binary search (using the cumulative frequency tree) for an interval
+  // containing [value_min, value_max). This works by calculating the cumulative
+  // count at a given node in the tree and checking whether the smallest code
+  // with a lower bound less than or equal to the value_min, is to the left or
+  // the right of that node.
+  count accumulator = 0;
+  int i = 0;
+  while (i < size_) {
+    count cumulative = accumulator + cumulative_frequency_[i];
+    bound current_min = within(range_min, range_max, ONE * cumulative / total_);
+    if (current_min <= value_min) {
+      // The current cumulative count gives a lower bound which is feasible, so
+      // we search to the right.
+      accumulator = cumulative;
+      i = 2 * i + 2;
     } else {
-      // mid comes after the lower bound, so any valid candidates must comes
-      // strictly before this one.
-      j = mid;
+      // The current cumulative count is too large, so we search to the left.
+      i = 2 * i + 1;
     }
   }
-  // At this point, i is the largest code for which the lower bound is less than
-  // or equal to the lower bound of the provided interval. Thus, we only need to
-  // check the upper bound.
-  if (within(range_min, range_max, upper(i)) >= value_max) {
-    *code = i;
-    return true;
-  } else {
-    // The upper bound for this code does not encapsulate the interval.
-    // Therefore, no such code exists.
-    return false;
-  }
+  i -= size_;
+  // At this point, i is the largest code which has a feasible lower bound, and
+  // we have the cumulative frequency up to i stored in the accumulator.
+  // Therefore, all that remains is to check that the upper bound (that is,
+  // cumulative + frequency_[i]) is larger than or equal to the upper bound for
+  // the value.
+  *code = i;
+  count cumulative = accumulator + frequency_[i];
+  bound current_max = within(range_min, range_max, ONE * cumulative / total_);
+  return current_max >= value_max;
 }
 
 // Set the relative frequency of the specified code to the given value.
