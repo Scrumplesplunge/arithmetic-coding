@@ -1,0 +1,12 @@
+A small and simple arithmetic coding implementation for C++. This does not
+attempt to be fast: it merely implements the algorithm as described on Wikipedia
+with minimal changes, and in an object-oriented manner.
+
+Compilation:
+
+Simply compile all source files and link together. A makefile is provided.
+
+Usage:
+
+./arithmetic encode < plaintext_input > compressed_output
+./arithmetic decode < compressed_input > plaintext_output

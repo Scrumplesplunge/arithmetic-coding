@@ -1,0 +1,67 @@
+#pragma once
+
+#include "types.h"
+
+#include <memory>
+
+// Represents an interval partition of [0, 1) between a number of codes.
+class Intervals {
+ public:
+  // Representation of 1 in the bound type. This must satisfy the constraint
+  // that neither of:
+  // 
+  // ONE * <sum of all relative frequencies>
+  // ONE^2
+  //
+  // overflow.
+  static const bound ONE;
+
+  // Returns the location of value when [0, ONE) is rescaled to [min, max).
+  static bound within(bound min, bound max, bound value);
+
+  // Construct a new instance with intervals for codes [0..num_codes).
+  Intervals(int num_codes);
+
+  // Fetch the (inclusive) lower bound for the given code.
+  bound lower(int code) const;
+
+  // Fetch the (exclusive) upper bound for the given code.
+  bound upper(int code) const;
+
+  // Rescaling the intervals into the range [min, max), returns the code for
+  // which all of [min_value, max_value) lie within one interval.
+  // Returns true and populates the output only if such a code was found.
+  bool CodeAt(bound min, bound max, bound min_value, bound max_value,
+              int* code) const;
+
+  // Set the relative frequency of the specified code to the given value.
+  void SetFrequency(int code, count frequency);
+
+  // Get the relative frequency of the specified code.
+  count frequency(int code) const;
+
+ private:
+  // Check that the given code index is within the acceptable bounds for this
+  // instance.
+  void check_bounds(int code) const;
+
+  // Recompute the interval bounds based upon the relative frequency values.
+  void UpdateIntervals();
+
+  // Reduce all relative frequencies by a factor of 2, except those which are 1.
+  void WeakenFrequencies();
+
+  // Number of different codes that have intervals.
+  int num_codes_;
+
+  // Interval bounds, arranged as follows:
+  // codes_[0]          = 0;
+  // codes_[i]          = <lower (inclusive) bound for code i>
+  // codes_[1 + i]      = <upper (exclusive) bound for code i>
+  // codes_[num_codes_] = ONE;
+  std::unique_ptr<bound[]> codes_;
+
+  // Relative frequency of each code type. Used for computing the interval
+  // bounds.
+  std::unique_ptr<count[]> frequency_;
+};
