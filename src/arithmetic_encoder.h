@@ -1,7 +1,7 @@
 #pragma once
 
+#include "bit_output.h"
 #include "intervals.h"
-#include "output.h"
 #include "types.h"
 
 #include <iostream>
@@ -26,6 +26,6 @@ class ArithmeticEncoder {
   // Ensure that the output falls within the correct final interval.
   void finish();
 
-  Output out_;
+  BitOutput out_;
   bound lower_ = 0, upper_ = Intervals::ONE;
 };

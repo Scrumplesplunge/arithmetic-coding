@@ -1,6 +1,7 @@
 #pragma once
 
 #include "intervals.h"
+#include "types.h"
 
 // Represents a bidirectional conversion between characters and code points.
 // The implementation simply wraps up an arbitrary char, but this could easily
@@ -11,10 +12,10 @@ class Coding {
   Intervals base_intervals() const;
 
   // Encode a character as a codepoint. Returns true if successful.
-  bool encode(char c, int* code) const;
+  bool encode(byte c, int* code) const;
 
   // Decode a character from a codepoint. Returns true if successful.
-  bool decode(int code, char* c) const;
+  bool decode(int code, byte* c) const;
 
   // Returns the number of codepoints in the encoding.
   int size() const;

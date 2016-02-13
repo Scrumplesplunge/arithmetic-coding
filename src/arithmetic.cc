@@ -1,5 +1,7 @@
 #include "arithmetic_decoder.h"
 #include "arithmetic_encoder.h"
+#include "byte_input.h"
+#include "byte_output.h"
 #include "coding.h"
 
 #include <stdexcept>
@@ -22,13 +24,14 @@ int main(int argc, char* args[]) {
   Intervals intervals = coding.base_intervals();
 
   if (mode == "encode") {
+    ByteInput input(cin);
     ArithmeticEncoder encoder(cout);
 
-    char c;
-    while (cin.get(c)) {
+    byte b;
+    while (input.get(&b)) {
       // Encode the character if it has an encoding. Otherwise, ignore it.
       int code;
-      if (coding.encode(c, &code)) {
+      if (coding.encode(b, &code)) {
         encoder.Encode(intervals, code);
         // Update the interval table.
         intervals.SetFrequency(code, intervals.frequency(code) + 1);
@@ -40,18 +43,19 @@ int main(int argc, char* args[]) {
     // Signify the end of the stream.
     encoder.Encode(intervals, coding.eof());
   } else if (mode == "decode") {
+    ByteOutput output(cout);
     ArithmeticDecoder decoder(cin);
 
     int code = decoder.Decode(intervals);
     int i = 0;
     while (code != coding.eof()) {
       i++;
-      char c;
-      if (!coding.decode(code, &c)) {
+      byte b;
+      if (!coding.decode(code, &b)) {
         throw logic_error(
             "Invalid codepoint returned from decoder: " + to_string(code));
       }
-      cout << c;
+      output.put(static_cast<char>(b));
       // Update the interval table.
       intervals.SetFrequency(code, intervals.frequency(code) + 1);
       code = decoder.Decode(intervals);

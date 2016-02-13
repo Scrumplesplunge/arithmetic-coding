@@ -8,14 +8,14 @@ Intervals Coding::base_intervals() const {
   return Intervals(size());
 }
 
-bool Coding::encode(char c, int* code) const {
-  *code = static_cast<byte>(c);
+bool Coding::encode(byte c, int* code) const {
+  *code = c;
   return true;
 }
 
-bool Coding::decode(int code, char* c) const {
+bool Coding::decode(int code, byte* c) const {
   if (code < 0) return false;
-  *c = static_cast<char>(code);
+  *c = code;
   return true;
 }
 

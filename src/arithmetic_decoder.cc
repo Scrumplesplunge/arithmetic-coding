@@ -9,11 +9,11 @@ ArithmeticDecoder::ArithmeticDecoder(istream& in)
 
 // Write the given code to the output, using the given interval table.
 int ArithmeticDecoder::Decode(const Intervals& intervals) {
-  // Repeatedly read more digits until all strings with this prefix have the
-  // same initial code.
+  read_bits();
+
   int code;
-  while (!intervals.CodeAt(lower_, upper_, value_, value_ + lsb_, &code))
-    read_bit();
+  if (!intervals.CodeAt(lower_, upper_, value_, value_ + 1, &code))
+    throw runtime_error("No code match found but precision limit reached.");
 
   // Retrieve the bounds q3 the given code.
   bound code_lower = intervals.lower(code);
@@ -60,18 +60,17 @@ void ArithmeticDecoder::expand() {
   if (lsb_ > Intervals::ONE)
     throw logic_error("Next bit position overflows.");
 
-  value_ = (2 * value_ + 0) & (Intervals::ONE - 1);
-
-  lower_ = ((2 * lower_) & (Intervals::ONE - 1));
-  upper_ = ((2 * upper_) & (Intervals::ONE - 1));
+  const int mask = Intervals::ONE - 1;
+  value_ = (value_ << 1) & mask;
+  lower_ = (lower_ << 1) & mask;
+  upper_ = (upper_ << 1) & mask;
 }
 
-// Fetch a bit and write it to value_.
-void ArithmeticDecoder::read_bit() {
-  if (lsb_ == 1)
-    throw logic_error("Next bit position underflows.");
-  lsb_ /= 2;
-
-  bit x = in_.get();
-  value_ |= x * lsb_;
+// Fetch as many bits as possible and put them in value_.
+void ArithmeticDecoder::read_bits() {
+  bit x;
+  while (lsb_ > 1 && in_.get(&x)) {
+    lsb_ /= 2;
+    value_ |= x * lsb_;
+  }
 }

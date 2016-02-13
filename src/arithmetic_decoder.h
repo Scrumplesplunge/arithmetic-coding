@@ -1,7 +1,7 @@
 #pragma once
 
+#include "bit_input.h"
 #include "intervals.h"
-#include "input.h"
 #include "types.h"
 
 #include <iostream>
@@ -22,10 +22,10 @@ class ArithmeticDecoder {
   // Discard the leading bit, shift up by one, and expand the ranges.
   void expand();
 
-  // Fetch a bit and write it to value_.
-  void read_bit();
+  // Fetch as many bits as possible and put them in value_.
+  void read_bits();
 
-  Input in_;
+  BitInput in_;
 
   // The position in value_ of the least significant bit that has been set.
   bound lsb_ = Intervals::ONE;
