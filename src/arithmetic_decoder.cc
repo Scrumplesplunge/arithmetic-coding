@@ -55,6 +55,7 @@ void ArithmeticDecoder::Renormalize() {
     value_ = (value_ * mul) & mask;
     lower_ = (lower_ * mul) & mask;
     upper_ = (upper_ * mul) & mask;
+    if (upper_ == 0) upper_ = Intervals::ONE;
   }
 }
 

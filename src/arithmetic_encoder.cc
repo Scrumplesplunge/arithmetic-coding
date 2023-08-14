@@ -55,6 +55,7 @@ void ArithmeticEncoder::Renormalize() {
 void ArithmeticEncoder::expand() {
   lower_ = ((2 * lower_) & (Intervals::ONE - 1));
   upper_ = ((2 * upper_) & (Intervals::ONE - 1));
+  if (upper_ == 0) upper_ = Intervals::ONE;
 }
 
 // Ensure that the output falls within the correct final interval.

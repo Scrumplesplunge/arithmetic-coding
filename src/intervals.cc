@@ -112,7 +112,8 @@ void Intervals::DebugPrint() const {
   for (int i = 0; i < num_codes_; i++) {
     double lower_bound = static_cast<double>(lower(i)) / ONE;
     double upper_bound = static_cast<double>(upper(i)) / ONE;
-    fprintf(stderr, "%3d : [%1.10lf, %1.10lf)\n", i, lower_bound, upper_bound);
+    fprintf(stderr, "%3d : [%1.10lf, %1.10lf) = %lu/%lu\n",
+            i, lower_bound, upper_bound, frequency_[i], total_);
   }
 }
 
